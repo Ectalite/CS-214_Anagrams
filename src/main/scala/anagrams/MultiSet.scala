@@ -11,23 +11,37 @@ package anagrams
   * m1 == m2 // true
   * }}}
   */
-type MultiSet[+A] =
-  Any // TODO: modify this
+type MultiSet[+A] = List[(A, Int)] //Recommended
 
 extension [A](set: MultiSet[A])
   /** Returns the list of all subsets of a given MultiSet
     *
-    * This always includes the multiset itself, i.e. `set.subsets.contains(set)
-    * // true` and the empty multiset.
+    * This always includes the multiset itself, i.e. `set.subsets.contains(set) // true`
+   *  and the empty multiset.
     *
-    * For example, the subsets of `{a, b, c}` should be `({}, {a}, {b}, {c}, {a,
-    * b}, {a, c}, {b, c}, {a, b, c})`
+    * For example, the subsets of `{a, b, c}` should be
+   * `({}, {a}, {b}, {c}, {a, b}, {a, c}, {b, c}, {a, b, c})`
     *
     * Note that the order in which subsets are returned does not matter.
     * However, the elements in each subset must remain canonical.
     */
   def subsets: List[MultiSet[A]] =
-    ???
+    val b = (for
+      item <- set
+      _ <- 0 until item._2
+    yield item._1)
+
+    val c = (for
+      i <- b.indices
+    yield b.combinations (i).toList).flatten
+
+    val d = (
+      for
+        item <- c
+      yield item.groupBy (identity).map ((a, b) => (a, b.size) ).toList
+    )
+    (d ++ List (set)).toList
+
 
   /** Subtracts multiset `other` from this multiset
     *
@@ -54,4 +68,4 @@ object MultiSet:
     *   https://dotty.epfl.ch/api/scala/collection/SeqOps.html#sortWith
     */
   def from[A](seq: Seq[A])(lt: (A, A) => Boolean): MultiSet[A] =
-    ???
+    seq.sortWith(lt).groupBy(identity).map((a, b) => (a,b.size)).toList
