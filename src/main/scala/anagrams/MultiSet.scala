@@ -26,21 +26,21 @@ extension [A](set: MultiSet[A])
     * However, the elements in each subset must remain canonical.
     */
   def subsets: List[MultiSet[A]] =
-    val b = (for
+    def originalSet = (for
       item <- set
       _ <- 0 until item._2
     yield item._1)
 
-    val c = (for
-      i <- b.indices
-    yield b.combinations (i).toList).flatten
+    def combineSet = (for
+      i <- originalSet.indices
+    yield originalSet.combinations (i).toList).flatten
 
-    val d = (
+    def groupSet = (
       for
-        item <- c
+        item <- combineSet
       yield item.groupBy (identity).map ((a, b) => (a, b.size) ).toList
     )
-    (d ++ List (set)).toList
+    (groupSet ++ List (set)).toList
 
 
   /** Subtracts multiset `other` from this multiset
