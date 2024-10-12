@@ -26,19 +26,18 @@ extension [A](set: MultiSet[A])
     * However, the elements in each subset must remain canonical.
     */
   def subsets: List[MultiSet[A]] =
-    def originalSet = for
-      item <- set
-      _ <- 0 until item._2
-    yield item._1
-
-    def combineSet = (for
-      i <- originalSet.indices
-    yield originalSet.combinations (i).toList).flatten
-
-    def groupSet = for
-      item <- combineSet
-    yield item.groupBy (identity).map ((a, b) => (a, b.size) ).toList
-    (groupSet ++ List (set)).toList
+    def subsetsWithCount(remaining: MultiSet[A]): List[MultiSet[A]] = remaining match {
+      case Nil => List(Nil) // Base case: only one subset of the empty set
+      case (item, count) :: rest =>
+        // Generate all subsets for the rest of the set
+        val restSubsets = subsetsWithCount(rest)
+        // For each subset, include the current item 0 to `count` times
+        (for {
+          subset <- restSubsets
+          c <- 0 to count
+        } yield if (c > 0) (item, c) :: subset else subset)
+    }
+    subsetsWithCount(set)
 
 
   /** Subtracts multiset `other` from this multiset
