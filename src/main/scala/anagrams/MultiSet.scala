@@ -49,12 +49,15 @@ extension [A](set: MultiSet[A])
     * Note: the resulting set must be a valid multiset: it must be canonical and
     * have no zero entries.
     */
-  def subtract(other: MultiSet[A]): MultiSet[A] =
-    for
-      item <- set
-      amountInOther <- other.find((a, _) => a == item._1).map((_, amount) => item._2 - amount).orElse(Option(item._2))
-      if amountInOther > 0
-    yield (item._1, amountInOther)
+  def subtract(other: MultiSet[A]): MultiSet[A] = {
+    // Efficiently subtract one occurrence list from another
+    other.foldLeft(set) {
+      case (acc, (char, count)) =>
+        acc.map { case (ch, cnt) =>
+          if (ch == char) (ch, cnt - count) else (ch, cnt)
+        }.filter(_._2 > 0) // Filter out chars with zero or negative counts
+    }
+  }
 
 object MultiSet:
 

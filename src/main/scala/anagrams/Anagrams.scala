@@ -116,11 +116,18 @@ def createDictionary(wordlist: Set[String]): Dictionary =
   * is an anagram of itself, and it must appear in the result.
   */
 def anagrams(dict: Dictionary, occurrences: OccurrenceList): AnagramsTree =
-  (
-    for
-        itemDico <- dict
-        if itemDico._1.subtract(occurrences).isEmpty
-        newOccurrences = occurrences.subtract(itemDico._1)
-        if newOccurrences.isEmpty || anagrams(dict, newOccurrences).nonEmpty
-    yield Branch(itemDico._2, anagrams(dict, newOccurrences))
-    ).toList
+  // Memoize to avoid recomputing results for the same `occurrences`
+  val memo = scala.collection.mutable.Map[OccurrenceList, AnagramsTree]()
+
+  def helper(occurrences: OccurrenceList): AnagramsTree = memo.getOrElseUpdate(occurrences, {
+    if (occurrences.isEmpty) Nil  // Base case: no more characters left
+    else
+      (for {
+        (dictOccur, words) <- dict
+        if dictOccur.subtract(occurrences).isEmpty
+        newOccurrences = occurrences.subtract(dictOccur)
+        if newOccurrences.isEmpty || helper(newOccurrences).nonEmpty
+      } yield Branch(words, helper(newOccurrences))).toList
+  })
+
+  helper(occurrences)
