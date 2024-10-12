@@ -50,7 +50,7 @@ def normalizeString(str: String): String =
   * Remember to normalize the sentence (`normalizeString`)
   */
 def sentenceOccurrences(s: Sentence): OccurrenceList =
-  MultiSet.from((for word <- s yield normalizeString(word).toCharArray).flatten)(_.toInt > _.toInt)
+  MultiSet.from((for word <- s yield normalizeString(word).toCharArray).flatten)(_.toInt < _.toInt)
 
 /** Constructs a `Map` from occurrence lists to a sequence of all the words that
   * have that occurrence count. This map makes it easy to obtain all the
@@ -116,4 +116,11 @@ def createDictionary(wordlist: Set[String]): Dictionary =
   * is an anagram of itself, and it must appear in the result.
   */
 def anagrams(dict: Dictionary, occurrences: OccurrenceList): AnagramsTree =
-  ???
+  (
+    for
+        itemDico <- dict
+        if itemDico._1.subtract(occurrences).isEmpty
+        newOccurrences = occurrences.subtract(itemDico._1)
+        if newOccurrences.isEmpty || anagrams(dict, newOccurrences).nonEmpty
+    yield Branch(itemDico._2, anagrams(dict, newOccurrences))
+    ).toList

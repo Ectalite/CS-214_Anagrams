@@ -1,6 +1,21 @@
 import anagrams.*
 import cs214.*
 
+object MultiSets:
+  object CharMultiSet:
+    def from(str: String): MultiSet[Char] =
+      MultiSet.from(normalizeString(str))(_ < _)
+  object IntMultiSet:
+    def from(seq: Seq[Int]): MultiSet[Int] =
+      MultiSet.from(seq)(_ < _)
+  object DoubleMultiSet:
+    def from(seq: Seq[Double]): MultiSet[Double] =
+      MultiSet.from(seq)(_ < _)
+  object ListIntMultiSet:
+    def from(seq: Seq[List[Int]]): MultiSet[List[Int]] =
+      MultiSet.from(seq)(_.sum < _.sum) // Arbitrary comparison function
+import MultiSets.*
+
 val tree = List(
     Branch(Set("a"), Nil),
     Branch(Set("bc", "cb"), List(
@@ -9,10 +24,6 @@ val tree = List(
 )
 
 tree.show
-
-object IntMultiSet:
-  def from(seq: Seq[Int]): MultiSet[Int] =
-    MultiSet.from(seq)(_ < _)
 
 val seq = Seq(1, 1, 2, 2, 3)
 
@@ -39,3 +50,18 @@ val d= (
   yield item.groupBy(identity).map((a, b) => (a,b.size)).toList
   )
 d ++ List(set1)
+
+val dico = createDictionary(loadWordlist("en-debian"))
+val occurrences = sentenceOccurrences(List("Linux", "rulez"))
+
+def anagrams(dict: Dictionary, occurrences: OccurrenceList): AnagramsTree =
+  (
+    for
+      itemDico <- dico
+      if itemDico._1.subtract(occurrences).isEmpty
+    yield Branch(itemDico._2, anagrams(dict, occurrences.subtract(itemDico._1)))
+  ).toList
+  
+anagrams(dico, occurrences).show
+                
+
