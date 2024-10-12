@@ -38,8 +38,7 @@ extension [A](set: MultiSet[A])
         } yield if (c > 0) (item, c) :: subset else subset)
     }
     subsetsWithCount(set)
-
-
+  
   /** Subtracts multiset `other` from this multiset
     *
     * For example, `{1, 2, 2, 2, 3, 4, 4} - {1, 2, 4}` should be `{2, 2, 3, 4}`
@@ -56,7 +55,6 @@ extension [A](set: MultiSet[A])
       amountInOther <- other.find((a, _) => a == item._1).map((_, amount) => item._2 - amount).orElse(Option(item._2))
       if amountInOther > 0
     yield (item._1, amountInOther)
-
 
 object MultiSet:
 

@@ -50,14 +50,14 @@ def normalizeString(str: String): String =
   * Remember to normalize the sentence (`normalizeString`)
   */
 def sentenceOccurrences(s: Sentence): OccurrenceList =
-  ???
+  MultiSet.from((for word <- s yield normalizeString(word).toCharArray).flatten)(_.toInt > _.toInt)
 
 /** Constructs a `Map` from occurrence lists to a sequence of all the words that
   * have that occurrence count. This map makes it easy to obtain all the
   * anagrams of a word given its occurrence list.
   */
 def createDictionary(wordlist: Set[String]): Dictionary =
-  ???
+  wordlist.groupBy(x => sentenceOccurrences(List(x)))
 
 /** Returns a tree of all anagram sentences of the given occurrence list using
   * the given dictionary.
