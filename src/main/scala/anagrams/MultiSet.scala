@@ -51,7 +51,12 @@ extension [A](set: MultiSet[A])
     * have no zero entries.
     */
   def subtract(other: MultiSet[A]): MultiSet[A] =
-    ???
+    for
+      item <- set
+      amountInOther <- other.find((a, _) => a == item._1).map((_, amount) => item._2 - amount).orElse(Option(item._2))
+      if amountInOther > 0
+    yield (item._1, amountInOther)
+
 
 object MultiSet:
 
