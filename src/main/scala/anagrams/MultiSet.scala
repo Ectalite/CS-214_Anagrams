@@ -1,5 +1,7 @@
 package anagrams
 
+import scala.annotation.tailrec
+
 /** A multiset (also known as a bag) is a generalization of a set that allows
   * for multiple occurrences of the same element. Elements of the set should be
   * represented using a unique _canonical_ representation.
@@ -25,20 +27,23 @@ extension [A](set: MultiSet[A])
     * Note that the order in which subsets are returned does not matter.
     * However, the elements in each subset must remain canonical.
     */
+
   def subsets: List[MultiSet[A]] =
-    def subsetsWithCount(remaining: MultiSet[A]): List[MultiSet[A]] = remaining match {
-      case Nil => List(Nil) // Base case: only one subset of the empty set
-      case (item, count) :: rest =>
-        // Generate all subsets for the rest of the set
-        val restSubsets = subsetsWithCount(rest)
-        // For each subset, include the current item 0 to `count` times
-        (for {
-          subset <- restSubsets
-          c <- 0 to count
-        } yield if (c > 0) (item, c) :: subset else subset)
-    }
-    subsetsWithCount(set)
-  
+    @tailrec
+    def subsetsWithCount(remaining: MultiSet[A], acc: List[MultiSet[A]]): List[MultiSet[A]] =
+      remaining match
+        case Nil => acc // Base case: no more elements, return accumulated subsets
+        case (item, count) :: rest =>
+          // Generate all possible additions of the current item from 0 to `count` times
+          val newSubsets =
+            for
+              subset <- acc
+              c <- 0 to count
+            yield if (c > 0) ((item, c) :: subset).reverse else subset
+          subsetsWithCount(rest, newSubsets)
+
+    subsetsWithCount(set, List(Nil))
+
   /** Subtracts multiset `other` from this multiset
     *
     * For example, `{1, 2, 2, 2, 3, 4, 4} - {1, 2, 4}` should be `{2, 2, 3, 4}`
